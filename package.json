@@ -1,6 +1,6 @@
 {
   "name": "@wireboard/mcp",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "mcpName": "io.github.wireboard/mcp",
   "description": "Official MCP server for WireBoard. Lets LLM agents query your analytics in conversation.",
   "license": "MIT",
@@ -13,7 +13,14 @@
   "bugs": {
     "url": "https://github.com/wireboard/mcp/issues"
   },
-  "keywords": ["wireboard", "analytics", "mcp", "llm", "claude", "agent"],
+  "keywords": [
+    "wireboard",
+    "analytics",
+    "mcp",
+    "llm",
+    "claude",
+    "agent"
+  ],
   "type": "module",
   "engines": {
     "node": ">=18"
@@ -36,7 +43,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.0",
-    "@wireboard/api": "^1.0.0"
+    "@wireboard/api": "^1.0.5"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

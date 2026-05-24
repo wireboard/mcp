@@ -25,6 +25,8 @@ import {
   type Tool,
 } from "@modelcontextprotocol/sdk/types.js";
 import {
+  PaidPlanRequiredError,
+  PlanHistoryLimitExceededError,
   WireBoardApiError,
   WireBoardAuthError,
   WireBoardClient,
@@ -384,10 +386,13 @@ function requiredStr(args: Record<string, unknown>, key: string): string {
   return v;
 }
 
-function errorPayload(msg: string): { content: { type: "text"; text: string }[]; isError: true } {
-  console.error(`[wireboard-mcp] ${msg}`);
+function errorPayload(
+  payload: string | Record<string, unknown>,
+): { content: { type: "text"; text: string }[]; isError: true } {
+  const obj = typeof payload === "string" ? { error: payload } : payload;
+  console.error(`[wireboard-mcp] ${JSON.stringify(obj)}`);
   return {
-    content: [{ type: "text", text: JSON.stringify({ error: msg }) }],
+    content: [{ type: "text", text: JSON.stringify(obj, null, 2) }],
     isError: true,
   };
 }
@@ -412,6 +417,27 @@ export async function main(): Promise<void> {
         content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }],
       };
     } catch (err) {
+      // SDK error subclasses are specific-to-general — check the narrowest ones first.
+      if (err instanceof PlanHistoryLimitExceededError) {
+        const earliest = err.earliestAllowed;
+        return errorPayload({
+          error: "plan_history_limit",
+          message: earliest
+            ? `The user's current WireBoard plan does not allow querying dates that far back. Earliest queryable date is ${earliest}.`
+            : "The user's current WireBoard plan does not allow querying dates that far back.",
+          earliestAllowed: earliest,
+          remediation: earliest
+            ? `Retry the call with from="${earliest}" to stay within the allowed window, OR tell the user they can upgrade for full history at https://wireboard.io/dashboard/billing. Pick based on which the user actually wants — don't silently narrow their date range.`
+            : "Narrow the date range, or tell the user they can upgrade for full history at https://wireboard.io/dashboard/billing.",
+        });
+      }
+      if (err instanceof PaidPlanRequiredError) {
+        return errorPayload({
+          error: "paid_plan_required",
+          message: "This tool requires a paid WireBoard plan. The user's API token is fine — the feature itself is plan-gated.",
+          remediation: "Tell the user this feature needs a paid plan and point them at https://wireboard.io/dashboard/billing. Do NOT suggest re-minting the token; it's not an auth problem.",
+        });
+      }
       if (err instanceof WireBoardAuthError) {
         return errorPayload(`Authentication failed (${err.httpStatus}): ${err.message}`);
       }
