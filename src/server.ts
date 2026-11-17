@@ -67,11 +67,27 @@ const SITE_ID_PROP = {
   description: "Site ID. Get it from list_sites if you don't know it.",
 };
 
+// Every tool only reads analytics through the WireBoard API: nothing is created,
+// changed or deleted, and calling a tool twice has no extra effect.
+function readOnlyTool(title: string): Pick<Tool, "title" | "annotations"> {
+  return {
+    title,
+    annotations: {
+      title,
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
+  };
+}
+
 // ─── Tool catalogue ─────────────────────────────────────────────────────────
 
 const TOOLS: Tool[] = [
   {
     name: "list_sites",
+    ...readOnlyTool("List sites"),
     description:
       "List every site in the WireBoard account. Returns each site's ID, domain, " +
       "and peak-concurrent-visitors over the last 30 days. Call this first if you " +
@@ -80,6 +96,7 @@ const TOOLS: Tool[] = [
   },
   {
     name: "get_account",
+    ...readOnlyTool("Get account"),
     description:
       "Get the team-owner identity (email, name) and the abilities of the token " +
       "in use. Useful for verifying which account the MCP is connected to.",
@@ -87,6 +104,7 @@ const TOOLS: Tool[] = [
   },
   {
     name: "get_aggregate",
+    ...readOnlyTool("Get period totals"),
     description:
       "Period totals for one site: visitors, pageviews, bounce_rate, visit_duration. " +
       "Use this for 'how many visitors did site X get in date range Y' style questions.",
@@ -101,6 +119,7 @@ const TOOLS: Tool[] = [
   },
   {
     name: "get_timeseries",
+    ...readOnlyTool("Get time series"),
     description:
       "One metric bucketed over time (hour or day). Use for 'plot pageviews per day " +
       "this month' or 'visitors per hour today'. Returns an array of {time, value} points.",
@@ -125,6 +144,7 @@ const TOOLS: Tool[] = [
   },
   {
     name: "get_history",
+    ...readOnlyTool("Get daily history"),
     description:
       "Per-day breakdown with visitors, returning_visitors, pageviews, bounce_rate, " +
       "and avg_duration in a single call. Use when the user wants a 'daily report' " +
@@ -140,6 +160,7 @@ const TOOLS: Tool[] = [
   },
   {
     name: "get_breakdown",
+    ...readOnlyTool("Get breakdown by dimension"),
     description:
       "Top-N rows by one dimension (country, device, browser, url, etc.). Use for " +
       "'top countries last week', 'most-used browsers', 'top referrer sources'. The " +
@@ -168,6 +189,7 @@ const TOOLS: Tool[] = [
   },
   {
     name: "get_top_urls",
+    ...readOnlyTool("Get top URLs"),
     description:
       "Per-URL metrics (visitors, pageviews, bounce_rate, avg_duration) with optional " +
       "filtering. Use for 'top pages under /blog', 'find the homepage's stats', 'which " +
@@ -216,6 +238,7 @@ const TOOLS: Tool[] = [
   },
   {
     name: "query_events",
+    ...readOnlyTool("Query custom events"),
     description:
       "Query custom events (purchases, form submits, button clicks, etc.). Filter by " +
       "category/action/label or UTM fields, group by any combination of those, paginate. " +
@@ -258,6 +281,7 @@ const TOOLS: Tool[] = [
   },
   {
     name: "get_live_state",
+    ...readOnlyTool("Get live snapshot"),
     description:
       "Current real-time snapshot for a site: live visitor count, top pages right now, " +
       "current top referrers, active sessions, etc. Use for 'what's happening on the site " +
@@ -279,6 +303,7 @@ const TOOLS: Tool[] = [
   },
   {
     name: "list_dimensions",
+    ...readOnlyTool("List dimensions and metrics"),
     description:
       "Lists every dimension, metric, and limit the API supports. Use as a self-discovery " +
       "tool when the user asks something like 'what can you tell me about my analytics' " +
@@ -296,8 +321,11 @@ function getClient(): WireBoardClient {
   const token = process.env.WIREBOARD_TOKEN;
   if (!token) {
     throw new Error(
-      "WIREBOARD_TOKEN env var is required. Set it in your MCP client's config " +
-        "(e.g. Claude Desktop mcpServers.wireboard.env).",
+      "No WireBoard API token is set. Create one at " +
+        "https://wireboard.io/dashboard/settings/api (abilities analytics:read and live:read), " +
+        "then set it as WIREBOARD_TOKEN in your MCP client's config. With the WireBoard " +
+        "plugin for Claude Code: run /plugin, open the Installed tab, select WireBoard, " +
+        "choose Configure options and paste the token.",
     );
   }
   clientSingleton = new WireBoardClient({ token });

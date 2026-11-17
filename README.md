@@ -18,7 +18,18 @@
 
 ## Install
 
-Two ways to install, pick whichever fits your setup.
+Three ways to install, pick whichever fits your setup.
+
+### Claude Code: the WireBoard plugin
+
+In [Claude Code](https://claude.com/claude-code), the [WireBoard plugin](https://github.com/wireboard/wireboard-claude-plugin) runs this server for you (and also teaches Claude to install WireBoard tracking in your code):
+
+```text
+/plugin marketplace add wireboard/wireboard-claude-plugin
+/plugin install wireboard@wireboard
+```
+
+Paste your API token when Claude Code asks for it. Claude Code keeps it in your system's secure storage.
 
 ### Option A: Desktop Extension (recommended for Claude Desktop users)
 
@@ -92,6 +103,8 @@ Claude will pick the right tool, call it, and answer in natural language.
 | `list_dimensions` | Meta: every dimension, metric, and limit the API supports |
 
 All tools accept natural date ranges: `"today"`, `"yesterday"`, `"last 7 days"` (or `"30d"` shorthand), `"this week"`, `"last week"`, `"this month"`, `"last month"`, or explicit `"YYYY-MM-DD..YYYY-MM-DD"`. Always UTC.
+
+Every tool is declared read-only to MCP clients (`readOnlyHint: true`, `destructiveHint: false`), with a human-readable title.
 
 ## Rate limiting
 
