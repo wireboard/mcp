@@ -20,16 +20,16 @@
 
 Three ways to install, pick whichever fits your setup.
 
-### Claude Code: the WireBoard plugin
+### Claude Code: the WireBoard Analytics MCP plugin
 
-In [Claude Code](https://claude.com/claude-code), the [WireBoard plugin](https://github.com/wireboard/wireboard-claude-plugin) runs this server for you (and also teaches Claude to install WireBoard tracking in your code):
+In [Claude Code](https://claude.com/claude-code), the [WireBoard Analytics MCP plugin](https://github.com/wireboard/wireboard-claude-plugin) runs this server for you:
 
 ```text
 /plugin marketplace add wireboard/wireboard-claude-plugin
-/plugin install wireboard@wireboard
+/plugin install wireboard-mcp@wireboard
 ```
 
-Paste your API token when Claude Code asks for it. Claude Code keeps it in your system's secure storage.
+Paste your API token when Claude Code asks for it. Claude Code keeps it in your system's secure storage. The same marketplace's `wireboard` plugin also teaches Claude to install WireBoard tracking in your code.
 
 ### Option A: Desktop Extension (recommended for Claude Desktop users)
 
