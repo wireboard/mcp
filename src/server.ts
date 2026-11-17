@@ -90,8 +90,11 @@ const TOOLS: Tool[] = [
     ...readOnlyTool("List sites"),
     description:
       "List every site in the WireBoard account. Returns each site's ID, domain, " +
-      "and peak-concurrent-visitors over the last 30 days. Call this first if you " +
-      "don't know which site_id to use for the other tools.",
+      "and max_30d: the highest number of visitors on the site at the same time over " +
+      "the last 30 complete UTC days (max_30d_at is that day). The current day is " +
+      "included once it has ended, so a site whose only traffic is today shows null; " +
+      "null does not mean tracking is broken (use get_aggregate for today). Call this " +
+      "first if you don't know which site_id to use for the other tools.",
     inputSchema: { type: "object", properties: {}, required: [] },
   },
   {
@@ -191,9 +194,14 @@ const TOOLS: Tool[] = [
     name: "get_top_urls",
     ...readOnlyTool("Get top URLs"),
     description:
-      "Per-URL metrics (visitors, pageviews, bounce_rate, avg_duration) with optional " +
-      "filtering. Use for 'top pages under /blog', 'find the homepage's stats', 'which " +
-      "checkout pages have the worst bounce rate'. Paginated via limit and offset.",
+      "Per-URL metrics with optional filtering. visitors: visits that started on the " +
+      "URL (entrances); a page reached later in a visit counts in pageviews only. " +
+      "bounce_rate: percentage of the visits that started there and saw no other " +
+      "page. avg_duration: average time on the page per pageview, in seconds (the " +
+      "dashboard's figure). Rows are ordered by visitors (entrances), so compare " +
+      "pageviews to find the most viewed pages. Use for 'top pages under /blog', " +
+      "'find the homepage's stats', 'which landing pages have the worst bounce " +
+      "rate'. Paginated via limit and offset.",
     inputSchema: {
       type: "object",
       properties: {
